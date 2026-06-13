@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require_relative '../lib/rivulet/cli'
+
+Dry::CLI.new(Rivulet::CLI::Commands).call
