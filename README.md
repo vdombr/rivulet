@@ -1,63 +1,85 @@
-# Rivulet
+<p align="center">
+  <img src="docs/logo.png" alt="Rivulet" width="200">
+</p>
 
-A small, powerful Rack web framework built on the `dry-rb` ecosystem and `Sequel`.
+<h1 align="center">Rivulet</h1>
 
-Rivulet is designed for developers who appreciate the modularity and type-safety of the `dry-rb` suite. It leverages `dry-operation` for pipeline-based business logic, `dry-monads` for error handling via `Success`/`Failure`, and `Sequel` for robust database interactions.
+A lightweight Rack framework built around Railway Oriented Programming, `dry-rb`, and `Sequel`.
 
-## Key Features
+## Requirements
 
-- **Built on `dry-rb`**: Utilizes `dry-operation`, `dry-monads`, `dry-configurable`, `dry-auto_inject`, and more to provide a predictable, composable architecture.
-- **Pipeline-based Logic**: Business logic is encapsulated in **Operations** composed of discrete, reusable **Steps**.
-- **Rails-like Routing**: A familiar DSL for defining routes (`get`, `post`, `resources`, `namespace`, `scope`).
-- **Powerful CLI**: A comprehensive command-line interface for scaffolding resources, services, handlers, and managing database migrations.
-- **Database Integration**: Seamlessly integrates with `Sequel` for all database operations.
-- **Container-First Development**: Designed to run easily within Docker environments.
+* Docker
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### Build the Framework Image
 
-- [Docker](https://www.docker.com/)
+```bash
+docker build -t rivulet .
+```
 
-### Running with Docker
+### Create a New Application
 
-The easiest way to work with Rivulet is using the provided Docker configuration.
+```bash
+docker run --rm \
+  -v $(pwd):/app \
+  rivulet \
+  bundle exec rivulet new blog
+```
 
-1.  **Build the image:**
-    ```bash
-    docker build -t rivulet .
-    ```
+### Enter the Project
 
-2.  **Create a new application:**
-    ```bash
-    docker run --rm -v $(pwd):/app rivulet bundle exec rivulet new my_app
-    ```
+```bash
+cd blog
+```
 
-## CLI Usage
+### Run the Application
 
-The `rivulet` CLI is your primary tool for application development and scaffolding.
+```bash
+docker run --rm \
+  -p 9292:9292 \
+  -v $(pwd):/app \
+  rivulet
+```
 
-### Application Management
+The application will be available at:
 
-| Command | Description |
-| :--- | :--- |
-| `new APP_NAME` | Generates a new Rivulet application. |
-| `console` (or `c`) | Opens an interactive Ruby console within the app context. |
-| `routes` | Lists all registered routes in the application. |
+```text
+http://localhost:9292
+```
 
-### Database Management
+## Database
 
-| Command | Description |
-| :--- | :--- |
-| `db migrate` | Runs pending database migrations. |
+Create a migration:
 
-### Scaffolding (Generation)
+```bash
+bundle exec rivulet g migration create_users
+```
 
-Use the `generate` (or `g`) command to scaffold various components:
+Run migrations:
 
-| Command | Description |
-| :--- | :--- |
-| `g resource NAME` | Generates a new resource. |
-| `g service [operation\|step] NAME` | Generates a new service operation or step. |
-| `g handler [operation\|step] NAME` | Generates a new handler operation or step. |
-| `g migration NAME` | Creates a new database migration file (plain SQL). |
+```bash
+bundle exec rivulet db migrate
+```
+
+## CLI
+
+Show all available commands:
+
+```bash
+bundle exec rivulet --help
+```
+
+Show generator options:
+
+```bash
+bundle exec rivulet g --help
+```
+
+## Documentation
+
+* Architecture & Design — `docs/architecture.md`
+
+## License
+
+Apache 2.0
