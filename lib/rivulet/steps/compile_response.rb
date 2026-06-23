@@ -34,7 +34,7 @@ module Rivulet
             return result if result in Failure
             result
           when :stream
-            [response.body, {}]
+            [Protocol::HTTP::Body::Stream.new(response.body), {}]
           when :as_is
             [response.body, {}]
           else

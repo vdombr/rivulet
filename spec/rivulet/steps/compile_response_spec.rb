@@ -351,12 +351,16 @@ RSpec.describe Rivulet::Steps::CompileResponse do
 
     context 'when format is stream' do
       let(:format) { :stream }
-      let(:body) { ['a', 'b'].each }
+      let(:body) { StringIO.new("a\nb\n") }
 
       it { expect(step).to be_success }
 
-      it 'passes the body through unchanged' do
-        expect(step.value![:response][2]).to eq(body)
+      it 'wraps the body in a Protocol::HTTP::Body::Stream' do
+        expect(step.value![:response][2]).to be_a(Protocol::HTTP::Body::Stream)
+      end
+
+      it 'wraps the original IO as the stream input' do
+        expect(step.value![:response][2].input).to eq(body)
       end
     end
 
