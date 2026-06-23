@@ -39,7 +39,11 @@ module Rivulet
     end
 
     def startup
-      startup_operation.(resource: self)
+      result = startup_operation.(resource: self)
+      if result.failure?
+        warn "Startup failed: #{result.failure}"
+        exit 1
+      end
       self
     end
 
