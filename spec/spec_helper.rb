@@ -25,6 +25,7 @@ require_relative '../lib/rivulet/routing/mapper'
 require_relative '../lib/rivulet/steps/validate_response'
 require_relative '../lib/rivulet/steps/compile_response'
 require_relative '../lib/rivulet/steps/build_context'
+require_relative '../lib/rivulet/steps/dispatch'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
