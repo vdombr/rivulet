@@ -8,10 +8,17 @@ RSpec.describe Rivulet::Steps::CompileResponse do
   let(:status) { 200 }
   let(:response) { Rivulet::Response.new(status: status, format: format, body: body) }
   let(:route) { Rivulet::Routing::Route.new(path: '/test_path') }
+  let(:sendfile_config) do
+    double('SendfileConfig', enabled: false, variation: 'x-accel-redirect', mappings: [])
+  end
+  let(:app) do
+    double('App', config: double('Config', sendfile: sendfile_config))
+  end
   let(:input) do
     {
       route: route,
-      response: response
+      response: response,
+      resource: app
     }
   end
 
@@ -259,6 +266,85 @@ RSpec.describe Rivulet::Steps::CompileResponse do
 
         it 'returns file_not_found failure with descriptive message' do
           expect(step.failure).to eq [:file_not_found, 'Cannot read file: /nonexistent/path/to/file.txt']
+        end
+      end
+
+      context 'when sendfile is enabled' do
+        let(:mappings) { [] }
+        let(:sendfile_config) do
+          double('SendfileConfig', enabled: true, variation: variation, mappings: mappings)
+        end
+        let(:variation) { 'x-accel-redirect' }
+
+        context 'with no mappings' do
+          it { expect(step).to be_success }
+
+          it 'sets X-Accel-Redirect to the raw path' do
+            expect(step.value![:response][1]['x-accel-redirect']).to eq(file.path)
+          end
+
+          it 'sets Content-Length to 0' do
+            expect(step.value![:response][1]['Content-Length']).to eq('0')
+          end
+
+          it 'returns empty body' do
+            expect(step.value![:response][2]).to eq([])
+          end
+        end
+
+        context 'with path mapping' do
+          let(:mappings) { [['/var/www/', '/files/']] }
+          let(:body) { '/var/www/reports/file.xlsx' }
+
+          it { expect(step).to be_success }
+
+          it 'sets X-Accel-Redirect to the mapped URI' do
+            expect(step.value![:response][1]['x-accel-redirect']).to eq('/files/reports/file.xlsx')
+          end
+
+          it 'sets Content-Length to 0' do
+            expect(step.value![:response][1]['Content-Length']).to eq('0')
+          end
+        end
+
+        context 'with hash body containing filename' do
+          let(:body) { { path: file.path, filename: 'report.xlsx' } }
+
+          it { expect(step).to be_success }
+
+          it 'sets Content-Disposition for nginx to pass through' do
+            expect(step.value![:response][1]['Content-Disposition']).to eq('inline; filename="report.xlsx"')
+          end
+
+          it 'sets Content-Type from filename extension' do
+            expect(step.value![:response][1]['Content-Type']).to eq('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+          end
+
+          it 'sets X-Accel-Redirect to the path' do
+            expect(step.value![:response][1]['x-accel-redirect']).to eq(file.path)
+          end
+        end
+
+        context 'with custom variation' do
+          let(:variation) { 'x-sendfile' }
+          let(:body) { '/var/www/file.txt' }
+
+          it { expect(step).to be_success }
+
+          it 'sets X-Sendfile header instead of X-Accel-Redirect' do
+            expect(step.value![:response][1]['x-sendfile']).to eq('/var/www/file.txt')
+            expect(step.value![:response][1]).not_to have_key('x-accel-redirect')
+          end
+        end
+
+        context 'when file does not exist' do
+          let(:body) { '/nonexistent/path/to/file.txt' }
+
+          it { expect(step).to be_success }
+
+          it 'sets X-Accel-Redirect regardless of file existence' do
+            expect(step.value![:response][1]['x-accel-redirect']).to eq('/nonexistent/path/to/file.txt')
+          end
         end
       end
     end

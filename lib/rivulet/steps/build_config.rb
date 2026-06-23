@@ -13,6 +13,12 @@ module Rivulet
           setting :level
         end
 
+        Rivulet::Application.setting :sendfile do
+          setting :enabled, default: false
+          setting :variation, default: 'x-accel-redirect'
+          setting :mappings, default: []
+        end
+
         Success(input)
       end
     end

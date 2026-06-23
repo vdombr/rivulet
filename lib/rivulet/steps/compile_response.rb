@@ -2,7 +2,7 @@ module Rivulet
   module Steps
     class CompileResponse < Rivulet::Step
       def call(input)
-        response = input[:response]
+        input => { resource:, response: }
 
         status = response.status
         format = response.format
@@ -30,8 +30,8 @@ module Rivulet
               }
             ]
           when :file
-            result = build_file_body(response.body)
-            return result if result.respond_to?(:failure?)
+            result = build_file_body(response.body, resource)
+            return result if result in Failure
             result
           when :stream
             [response.body, {}]
@@ -50,8 +50,17 @@ module Rivulet
 
       private
 
-      def build_file_body(body)
+      def build_file_body(body, app)
         path = body.is_a?(Hash) ? body[:path] : body
+
+        if app.config.sendfile.enabled
+          build_sendfile_body(body, path, app.config.sendfile)
+        else
+          build_streaming_file_body(body, path)
+        end
+      end
+
+      def build_streaming_file_body(body, path)
         file_body =
           begin
             Protocol::HTTP::Body::File.open(path)
@@ -60,6 +69,24 @@ module Rivulet
           end
 
         [file_body, file_headers(body, file_body.length)]
+      end
+
+      def build_sendfile_body(body, path, sendfile_config)
+        uri     = map_sendfile_path(path, sendfile_config.mappings)
+        headers = file_headers(body, 0)
+        headers[sendfile_config.variation.downcase] = uri
+        [[], headers]
+      end
+
+      def map_sendfile_path(path, mappings)
+        return path if mappings.empty?
+
+        mappings.each do |internal, external|
+          mapped = path.sub(/\A#{Regexp.escape(internal)}/i, external)
+          return mapped unless mapped == path
+        end
+
+        path
       end
 
       def file_headers(body, length)

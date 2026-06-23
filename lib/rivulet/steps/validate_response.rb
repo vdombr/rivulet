@@ -5,10 +5,10 @@ module Rivulet
       FORMAT_VALUES = %i[json text file stream as_is].freeze
 
       def call(input)
-        response = input[:response]
+        input => { response:, route: }
 
         unless response.is_a? Rivulet::Response
-          return Failure[:wrong_response_type, "Invalid response type for #{input[:route].path}"]
+          return Failure[:wrong_response_type, "Invalid response type for #{route.path}"]
         end
 
         if NO_BODY_STATUSES.include?(response.status) && !response.body.nil?
