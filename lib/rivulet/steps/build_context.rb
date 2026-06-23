@@ -2,8 +2,10 @@ module Rivulet
   module Steps
     class BuildContext < Rivulet::Step
       def call(input)
-        request = Rivulet::Request.new(input[:env])
-        routes = input[:resource].routes
+        input => { env:, resource: }
+
+        request = Rivulet::Request.new(env)
+        routes = resource.routes
 
         route, path_match = find_route(routes, request)
         return Failure[:route_not_found] unless route
@@ -18,7 +20,7 @@ module Rivulet
           }
         )
 
-        input[:resource].logger.info(
+        resource.logger.info(
           "Request #{request.http_method.upcase} #{request.path} #{input[:params]}"
         )
 

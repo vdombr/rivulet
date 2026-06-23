@@ -74,6 +74,10 @@ module Rivulet
             Rivulet.configure do |config|
               # config.database.dsn = ENV.fetch('DATABASE_URL', 'sqlite://db/#{name}.sqlite3')
 
+              # config.sendfile.enabled   = true
+              # config.sendfile.variation = 'x-accel-redirect'
+              # config.sendfile.mappings   = [['/var/www/', '/files/']]
+
               config.logger.name  = :#{name}
               config.logger.level = :info
             end
