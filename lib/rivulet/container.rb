@@ -11,17 +11,18 @@ module Rivulet
     end
 
     namespace('steps') do
-      register('build_config')    { Rivulet::Steps::BuildConfig.new }
-      register('build_context')   { Rivulet::Steps::BuildContext.new }
-      register('build_response')  { Rivulet::Steps::BuildResponse.new }
-      register('dispatch')        { Rivulet::Steps::Dispatch.new }
-      register('load_app')        { Rivulet::Steps::LoadApp.new }
-      register('load_settings')   { Rivulet::Steps::LoadSettings.new }
-      register('load_db')         { Rivulet::Steps::LoadDb.new }
-      register('load_routes')     { Rivulet::Steps::LoadRoutes.new }
-      register('run_migrations')  { Rivulet::Steps::RunMigrations.new }
-      register('run_console')     { Rivulet::Steps::RunConsole.new }
-      register('print_routes')    { Rivulet::Steps::PrintRoutes.new }
+      register('build_config')      { Rivulet::Steps::BuildConfig.new }
+      register('build_context')     { Rivulet::Steps::BuildContext.new }
+      register('validate_response') { Rivulet::Steps::ValidateResponse.new }
+      register('compile_response')  { Rivulet::Steps::CompileResponse.new }
+      register('dispatch')          { Rivulet::Steps::Dispatch.new }
+      register('load_app')          { Rivulet::Steps::LoadApp.new }
+      register('load_settings')     { Rivulet::Steps::LoadSettings.new }
+      register('load_db')           { Rivulet::Steps::LoadDb.new }
+      register('load_routes')       { Rivulet::Steps::LoadRoutes.new }
+      register('run_migrations')    { Rivulet::Steps::RunMigrations.new }
+      register('run_console')       { Rivulet::Steps::RunConsole.new }
+      register('print_routes')      { Rivulet::Steps::PrintRoutes.new }
     end
   end
 end
