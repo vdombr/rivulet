@@ -22,10 +22,13 @@ module Rivulet
       case result
       in Failure[:route_not_found]
         [404, { 'Content-Type' => 'text/plain' }, ['Not Found']]
-      in Failure[:wrong_reponse_type, message]
+      in Failure[:wrong_response_type, message]
         logger.error(message)
         [500, {}, []]
       in Failure[:conflicting_response, message]
+        logger.error(message)
+        [500, {}, []]
+      in Failure[:file_not_found, message]
         logger.error(message)
         [500, {}, []]
       end

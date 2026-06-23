@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-validation'
   spec.add_dependency 'dry-transformer'
   spec.add_dependency 'oj'
+  spec.add_dependency 'protocol-http'
   spec.add_dependency 'rack'
   spec.add_dependency 'zeitwerk'
   spec.add_dependency 'sequel'
