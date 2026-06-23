@@ -3,6 +3,7 @@
 require 'dry/monads'
 require 'dry/auto_inject'
 require 'dry/core/container'
+require 'dry/logger'
 require 'oj'
 require 'protocol/http'
 require 'protocol/http/body/file'
@@ -10,15 +11,20 @@ require 'rack'
 require 'rack/mime'
 require 'tempfile'
 
+require 'stringio'
+
 require_relative '../lib/rivulet/telemetry'
 require_relative '../lib/rivulet/telemetry/node'
 require_relative '../lib/rivulet/telemetry/timing_wrapper'
 require_relative '../lib/rivulet/step'
 require_relative '../lib/rivulet/container'
+require_relative '../lib/rivulet/request'
 require_relative '../lib/rivulet/response'
 require_relative '../lib/rivulet/routing/route'
+require_relative '../lib/rivulet/routing/mapper'
 require_relative '../lib/rivulet/steps/validate_response'
 require_relative '../lib/rivulet/steps/compile_response'
+require_relative '../lib/rivulet/steps/build_context'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
