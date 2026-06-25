@@ -1,9 +1,9 @@
 require_relative 'lib/rivulet/version'
 
 Gem::Specification.new do |spec|
-  spec.name    = 'rivulet'
+  spec.name    = 'rivulet-rb'
   spec.version = Rivulet::VERSION
-  spec.summary = 'A small Rack web framework built on dry-rb'
+  spec.summary = 'A small Rack web framework built on dry-rb, falcon and forced layering architecture'
   spec.authors = ['Vladimir Dombrovskiy <vold@fastmail.com>']
 
   spec.files         = Dir['lib/**/*.rb'] + Dir['bin/*']

@@ -1,16 +1,13 @@
 FROM ruby:3.4-alpine
 
-WORKDIR /rivulet
+RUN apk add --no-cache build-base openssl-dev
 
-COPY Gemfile rivulet.gemspec ./
-COPY lib/ lib/
-COPY bin/ bin/
-
-RUN apk add --no-cache build-base openssl-dev && bundle install
+ARG RIVULET_VERSION=
+RUN gem install rivulet $([ -n "$RIVULET_VERSION" ] && echo "-v $RIVULET_VERSION") falcon
 
 ENV PATH="/usr/local/bundle/bin:$PATH"
-ENV BUNDLE_GEMFILE=/rivulet/Gemfile
 
 WORKDIR /app
 
-CMD ["bundle", "exec", "falcon", "serve", "-n", "1", "-b", "http://0.0.0.0:9292"]
+ENTRYPOINT ["rivulet"]
+CMD ["--help"]
