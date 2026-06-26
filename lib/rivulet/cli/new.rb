@@ -56,7 +56,7 @@ module Rivulet
           <<~RUBY
             source 'https://rubygems.org'
 
-            gem 'rivulet'
+            gem 'rivulet-rb'
             gem 'falcon'
           RUBY
         end
