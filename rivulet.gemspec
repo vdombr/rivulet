@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'zeitwerk'
   spec.add_dependency 'sequel'
 
+  spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'sqlite3'
 end
