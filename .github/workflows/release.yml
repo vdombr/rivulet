@@ -51,6 +51,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/rivulet:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/rivulet:${{ steps.version.outputs.tag }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/rivulet:${{ steps.version.outputs.tag }}-${{ github.sha }}
+            ${{ vars.DOCKERHUB_USERNAME }}/rivulet:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/rivulet:${{ steps.version.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/rivulet:${{ steps.version.outputs.tag }}-${{ github.sha }}
