@@ -3,7 +3,7 @@ FROM ruby:3.4-alpine
 RUN apk add --no-cache build-base openssl-dev
 
 ARG RIVULET_VERSION=
-RUN gem install rivulet-rb $([ -n "$RIVULET_VERSION" ] && echo "-v $RIVULET_VERSION") falcon
+RUN gem install "rivulet-rb${RIVULET_VERSION:+:$RIVULET_VERSION}" falcon
 
 ENV PATH="/usr/local/bundle/bin:$PATH"
 
