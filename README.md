@@ -4,7 +4,7 @@
 
 <h1 align="center">Rivulet</h1>
 
-A lightweight Rack framework built around Railway Oriented Programming, `dry-rb`, and `Sequel`.
+A lightweight Rack framework built around Railway Oriented Programming, `dry-rb`, `falcon`, and `Sequel`.
 
 ## Requirements
 
@@ -12,34 +12,45 @@ A lightweight Rack framework built around Railway Oriented Programming, `dry-rb`
 
 ## Quick Start
 
-### Build the Framework Image
-
-```bash
-docker build -t rivulet .
-```
-
 ### Create a New Application
+
+Use the published base image to scaffold a new project:
 
 ```bash
 docker run --rm \
   -v $(pwd):/app \
-  rivulet \
-  bundle exec rivulet new blog
+  mrvold/rivulet:latest \
+  new blog
 ```
 
-### Enter the Project
+The image is pulled automatically on first run if you don't have it locally.
+
+To include a database, pass `--with-db`:
 
 ```bash
-cd blog
+docker run --rm \
+  -v $(pwd):/app \
+  mrvold/rivulet:latest \
+  new blog --with-db=postgres
 ```
+
+Supported adapters: `postgres`, `sqlite`, `mysql`. Omit the flag for no database.
 
 ### Run the Application
 
+The generated project includes a `Dockerfile` and a `docker-compose.yml`.
+When created with `--with-db=postgres` or `--with-db=mysql`, compose also runs
+a database service. On first run, compose builds the application image from
+the base image:
+
 ```bash
-docker run --rm \
-  -p 9292:9292 \
-  -v $(pwd):/app \
-  rivulet
+docker compose up
+```
+
+Rebuild after changing the application's `Gemfile`:
+
+```bash
+docker compose up --build
 ```
 
 The application will be available at:
