@@ -6,6 +6,7 @@ module Rivulet
       class New < Dry::CLI::Command
         desc "Create a new Rivulet application"
         argument :name, required: true, desc: "Application name"
+        option :with_db, values: %w[postgres sqlite mysql], desc: "Database adapter (omit for no database)"
 
         DIRS = %w[
           app/handlers
@@ -21,14 +22,16 @@ module Rivulet
           db/migrations
         ].freeze
 
-        def call(name:, **)
+        def call(name:, with_db: nil, **)
           DIRS.each { |d| create_dir "#{name}/#{d}" }
 
-          write name, 'Gemfile',                    gemfile
+          write name, 'Gemfile',                    gemfile(with_db)
           write name, 'config.ru',                 config_ru
-          write name, 'config/application.rb',     application_config(name)
+          write name, 'config/application.rb',     application_config(name, with_db)
           write name, 'config/routes.rb',          routes_config
           write name, 'falcon.rb',                   falcon_config
+          write name, 'Dockerfile',                  dockerfile(with_db)
+          write name, 'docker-compose.yml',          docker_compose(name, with_db)
           write name, 'app/handlers.rb', handlers_container
           write name, 'app/handlers/shared/container.rb', handlers_shared_container
           write name, 'app/handlers/shared/namespace.rb', handlers_shared_namespace
@@ -37,7 +40,7 @@ module Rivulet
           write name, 'app/services/shared/namespace.rb', services_shared_namespace
           write name, 'app/application_contract.rb', application_contract_template
 
-          puts "\nDone! Next steps:\n  cd #{name}\n  bundle install\n  bundle exec falcon host falcon.rb"
+          puts "\nDone! Next steps:\n  cd #{name}\n  docker compose up"
         end
 
         private
@@ -52,12 +55,19 @@ module Rivulet
           puts "  create  #{relative_path}"
         end
 
-        def gemfile
+        def gemfile(db)
+          adapter = case db
+                    when 'postgres' then "gem 'pg'"
+                    when 'sqlite'   then "gem 'sqlite3'"
+                    when 'mysql'    then "gem 'mysql2'"
+                    end
+
           <<~RUBY
             source 'https://rubygems.org'
 
             gem 'rivulet-rb'
             gem 'falcon'
+            #{adapter}
           RUBY
         end
 
@@ -69,10 +79,22 @@ module Rivulet
           RUBY
         end
 
-        def application_config(name)
+        def application_config(name, db)
+          dsn_default = case db
+                        when 'postgres' then "postgres://rivulet:rivulet@db:5432/#{name}_development"
+                        when 'sqlite'   then "sqlite://db/#{name}.sqlite3"
+                        when 'mysql'    then "mysql2://rivulet:rivulet@db:3306/#{name}_development"
+                        end
+
+          dsn_line = if dsn_default
+                       "config.database.dsn = ENV.fetch('DATABASE_URL', '#{dsn_default}')"
+                     else
+                       "# config.database.dsn = ENV.fetch('DATABASE_URL', 'postgres://rivulet:rivulet@db:5432/#{name}_development')"
+                     end
+
           <<~RUBY
             Rivulet.configure do |config|
-              # config.database.dsn = ENV.fetch('DATABASE_URL', 'sqlite://db/#{name}.sqlite3')
+              #{dsn_line}
 
               # config.sendfile.enabled   = true
               # config.sendfile.variation = 'x-accel-redirect'
@@ -94,6 +116,119 @@ module Rivulet
               include Falcon::Environment::Rackup
             end
           RUBY
+        end
+
+        def dockerfile(db)
+          apk = case db
+                when 'postgres' then "RUN apk add --no-cache postgresql-dev libpq\n\n"
+                when 'sqlite'   then "RUN apk add --no-cache sqlite-dev\n\n"
+                when 'mysql'    then "RUN apk add --no-cache mariadb-dev\n\n"
+                end
+
+          <<~DOCKERFILE
+            FROM mrvold/rivulet:latest
+            #{apk}WORKDIR /app
+            COPY Gemfile ./
+            RUN bundle install
+
+            EXPOSE 9292
+
+            ENTRYPOINT []
+            CMD ["bundle", "exec", "falcon", "serve", "-n", "1", "-b", "http://0.0.0.0:9292"]
+          DOCKERFILE
+        end
+
+        def docker_compose(name, db)
+          case db
+          when 'postgres' then docker_compose_postgres(name)
+          when 'mysql'    then docker_compose_mysql(name)
+          else                 docker_compose_simple
+          end
+        end
+
+        def docker_compose_simple
+          <<~YAML
+            services:
+              app:
+                build: .
+                ports:
+                  - "9292:9292"
+                volumes:
+                  - ./:/app
+          YAML
+        end
+
+        def docker_compose_postgres(name)
+          <<~YAML
+            services:
+              app:
+                build: .
+                ports:
+                  - "9292:9292"
+                environment:
+                  DATABASE_URL: postgres://rivulet:rivulet@db:5432/#{name}_development
+                volumes:
+                  - ./:/app
+                depends_on:
+                  db:
+                    condition: service_healthy
+
+              db:
+                image: postgres:17-alpine
+                environment:
+                  POSTGRES_USER: rivulet
+                  POSTGRES_PASSWORD: rivulet
+                  POSTGRES_DB: #{name}_development
+                ports:
+                  - "5432:5432"
+                volumes:
+                  - db:/var/lib/postgresql/data
+                healthcheck:
+                  test: ["CMD-SHELL", "pg_isready -U rivulet"]
+                  interval: 5s
+                  timeout: 3s
+                  retries: 5
+
+            volumes:
+              db:
+          YAML
+        end
+
+        def docker_compose_mysql(name)
+          <<~YAML
+            services:
+              app:
+                build: .
+                ports:
+                  - "9292:9292"
+                environment:
+                  DATABASE_URL: mysql2://rivulet:rivulet@db:3306/#{name}_development
+                volumes:
+                  - ./:/app
+                depends_on:
+                  db:
+                    condition: service_healthy
+
+              db:
+                image: mysql:8
+                environment:
+                  MYSQL_ROOT_PASSWORD: root
+                  MYSQL_USER: rivulet
+                  MYSQL_PASSWORD: rivulet
+                  MYSQL_DATABASE: #{name}_development
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - db:/var/lib/mysql
+                healthcheck:
+                  test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u rivulet -privulet"]
+                  interval: 5s
+                  timeout: 3s
+                  retries: 5
+
+            volumes:
+              db:
+          YAML
         end
 
         def routes_config
