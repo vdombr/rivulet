@@ -61,6 +61,14 @@ RSpec.describe Rivulet::CLI::Commands::New do
       expect(compose).not_to include('image: postgres')
       expect(compose).not_to include('image: mysql')
     end
+
+    it 'creates a self-contained AGENTS.md guide' do
+      expect(File.exist?("#{app_name}/AGENTS.md")).to be(true)
+      content = File.read("#{app_name}/AGENTS.md")
+      expect(content).to include('# AGENTS.md')
+      expect(content).to include('rivulet g handler')
+      expect(content).to include('Railway')
+    end
   end
 
   context 'with --with-db' do

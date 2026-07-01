@@ -266,32 +266,35 @@ Each step receives the current state of the input and may:
 
 As execution progresses, the input is enriched and transformed by each step.
 
-For example:
+For example, a service operation may start with:
 
 ```ruby
 {
-  params: {...}
+  resource: Post,
+  attributes: { ... }
 }
 ```
 
-may become:
+then, after validation, remain the same shape (now validated):
 
 ```ruby
 {
-  params: {...},
-  current_user: user
+  resource: Post,
+  attributes: { ... }
 }
 ```
 
-and later:
+and after a create step that substitutes the persisted instance:
 
 ```ruby
 {
-  params: {...},
-  current_user: user,
-  resource: created_user
+  resource: #<Post instance>,
+  attributes: { ... }
 }
 ```
+
+Handler operations use a different input shape — `{ params:, context: }` —
+as described in [Handler Conventions](#handler-conventions).
 
 This approach eliminates hidden state and makes every transformation explicit.
 
@@ -372,7 +375,6 @@ Examples include:
 
 * JWT validation and decoding.
 * Current user resolution.
-* Authorization checks.
 * Request metadata extraction.
 * Header normalization.
 * Context enrichment.
@@ -541,6 +543,21 @@ Services encapsulate business use cases and remain independent from transport co
 
 Services typically receive an input hash containing the resources and attributes required to execute the use case.
 
+For example:
+
+```ruby
+{
+  resource: Post,
+  attributes: { name: 'John Doe', email: 'john.doe@example.com' }
+}
+```
+
+The `resource` slot acts as a dependency-injection point: it enters as a
+model class (e.g. `Post`, or any ancestor/subclass) and may be substituted
+with a persisted instance as the pipeline progresses (e.g. after a create
+step). The contract is responsible for validating the `resource` type —
+including allowed classes or ancestors — alongside the `attributes`.
+
 ### Output
 
 Services return either:
@@ -553,6 +570,27 @@ where the input hash contains the current execution state.
 ### Validation
 
 Services are expected to utilize contracts for data validation before performing business operations.
+
+A shared `Validate` step runs the contract against the input and returns
+`Success(result.to_h)` on success, or
+`Failure[:validation, result.errors.to_h]` on errors:
+
+```ruby
+module Services
+  module Shared
+    module Steps
+      class Validate < Rivulet::Step
+        def call(input, contract)
+          result = contract.call(input)
+          return Success(result.to_h) if result.success?
+
+          Failure[:validation, result.errors.to_h]
+        end
+      end
+    end
+  end
+end
+```
 
 ### Projection
 
