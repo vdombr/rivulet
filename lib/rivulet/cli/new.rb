@@ -39,6 +39,7 @@ module Rivulet
           write name, 'app/services/shared/container.rb', services_shared_container
           write name, 'app/services/shared/namespace.rb', services_shared_namespace
           write name, 'app/application_contract.rb', application_contract_template
+          copy name, 'AGENTS.md', File.expand_path('../../../docs/AGENTS.md', __dir__)
 
           puts "\nDone! Next steps:\n  cd #{name}\n  docker compose up"
         end
@@ -52,6 +53,11 @@ module Rivulet
 
         def write(root, relative_path, content)
           File.write(File.join(root, relative_path), content)
+          puts "  create  #{relative_path}"
+        end
+
+        def copy(root, relative_path, source_path)
+          FileUtils.copy_file(source_path, File.join(root, relative_path))
           puts "  create  #{relative_path}"
         end
 

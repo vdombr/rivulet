@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'A small Rack web framework built on dry-rb, falcon and forced layering architecture'
   spec.authors = ['Vladimir Dombrovskiy <vold@fastmail.com>']
 
-  spec.files         = Dir['lib/**/*.rb'] + Dir['bin/*']
+  spec.files         = Dir['lib/**/*.rb'] + Dir['bin/*'] + Dir['docs/*.md']
   spec.executables   = ['rivulet']
   spec.require_paths = ['lib']
 
