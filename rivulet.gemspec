@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.executables   = ['rivulet']
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 3.1'
+  spec.required_ruby_version = '>= 3.2'
 
   spec.add_dependency 'dry-auto_inject'
   spec.add_dependency 'dry-cli'
