@@ -74,7 +74,7 @@ module Rivulet
     private
 
     def with_telemetry
-      t = Telemetry.new
+      t = Telemetry.new(sink: config.telemetry.sink)
       Fiber[:rivulet_telemetry] = t
 
       result = yield
@@ -84,6 +84,7 @@ module Rivulet
       )
       result
     ensure
+      t&.finish
       Fiber[:rivulet_telemetry] = nil
     end
   end

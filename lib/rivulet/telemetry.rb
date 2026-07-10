@@ -2,11 +2,12 @@ module Rivulet
   class Telemetry
     attr_reader :db_ms
 
-    def initialize
+    def initialize(sink:)
       @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       @root       = nil
       @stack      = []
       @db_ms      = 0.0
+      @sink       = sink
     end
 
     def start_recording(activity)
@@ -16,12 +17,15 @@ module Rivulet
         children: []
       )
 
+      parent = @stack.last
+
       if @stack.empty?
         @root = node
       else
         @stack.last[:children] << node
       end
 
+      @sink.on_start(node, parent)
       @stack << node
     end
 
@@ -32,10 +36,13 @@ module Rivulet
         ((node.ended_at - node.started_at) * 1000.0).round(3)
       node.self_ms =
         (node.duration_ms - node.children.sum(&:duration_ms)).round(3)
+
+      @sink.on_stop(node)
     end
 
     def record_db(ms)
       @db_ms = (@db_ms + ms).round(3)
+      @sink.on_db(ms)
     end
 
     def total_ms
@@ -57,6 +64,10 @@ module Rivulet
       end
 
       entry
+    end
+
+    def finish
+      @sink.on_root(@root, total_ms)
     end
   end
 end

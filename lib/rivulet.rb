@@ -17,6 +17,7 @@ require 'sequel'
 
 require_relative 'rivulet/version'
 require_relative 'rivulet/telemetry'
+require_relative 'rivulet/telemetry/sink'
 require_relative 'rivulet/telemetry/node'
 require_relative 'rivulet/telemetry/sequel_extension'
 require_relative 'rivulet/telemetry/timing_wrapper'
