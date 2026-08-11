@@ -19,6 +19,10 @@ module Rivulet
           setting :mappings, default: []
         end
 
+        Rivulet::Application.setting :telemetry do
+          setting :sink, default: Rivulet::Telemetry::Sink::Null.new
+        end
+
         Success(input)
       end
     end

@@ -84,7 +84,7 @@ app/
       utils/
   models/            # Sequel models
 config/
-  application.rb     # App configuration (DSN, logger, sendfile)
+  application.rb     # App configuration (DSN, logger, sendfile, telemetry)
   routes.rb          # Route definitions
 db/
   migrations/        # SQL migration files
@@ -739,3 +739,8 @@ must be self-contained SQL; there is no `drop`/`alter` safety net.
   them in the container instead.
 - Keep nesting in routes shallow and meaningful — express context, not the
   full domain hierarchy.
+- Every request is automatically timed through `Rivulet::Telemetry` (one node
+  per operation and step, plus DB timing). The tree is logged at the end of
+  each request. If `config.telemetry.sink` is set (e.g. to
+  `Rivulet::OTel::Sink.new` via `rivulet-otel setup`), the sink receives
+  callbacks for each lifecycle event. The default sink is a no-op.

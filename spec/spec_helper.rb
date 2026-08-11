@@ -28,6 +28,9 @@ require_relative '../lib/rivulet/steps/compile_response'
 require_relative '../lib/rivulet/steps/build_context'
 require_relative '../lib/rivulet/steps/dispatch'
 require_relative '../lib/rivulet/steps/load_routes'
+require_relative '../lib/rivulet/telemetry'
+require_relative '../lib/rivulet/telemetry/sink'
+require_relative '../lib/rivulet/telemetry/node'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

@@ -90,6 +90,7 @@ bundle exec rivulet g --help
 ## Documentation
 
 * Architecture & Design — `docs/architecture.md`
+* Telemetry — `docs/telemetry.md`
 
 ## License
 
