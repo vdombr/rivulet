@@ -19,6 +19,7 @@ module Rivulet
           app/services/shared/utils
           app/models
           config
+          config/initializers
           db/migrations
         ].freeze
 
