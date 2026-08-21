@@ -2,11 +2,12 @@ module Rivulet
   module Operations
     class Startup < Rivulet::Operation
       include Import[
-        build_config:  'steps.build_config',
-        load_settings: 'steps.load_settings',
-        load_app:      'steps.load_app',
-        load_db:       'steps.load_db',
-        load_routes:   'steps.load_routes'
+        build_config:      'steps.build_config',
+        load_settings:     'steps.load_settings',
+        load_app:          'steps.load_app',
+        load_db:           'steps.load_db',
+        load_routes:       'steps.load_routes',
+        load_initializers: 'steps.load_initializers'
       ]
 
       def call(input = {})
@@ -15,6 +16,7 @@ module Rivulet
         result = step load_db.(result)
         result = step load_app.(result)
         result = step load_routes.(result)
+        result = step load_initializers.(result)
 
         result
       end

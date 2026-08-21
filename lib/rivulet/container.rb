@@ -20,6 +20,7 @@ module Rivulet
       register('load_settings')     { Rivulet::Steps::LoadSettings.new }
       register('load_db')           { Rivulet::Steps::LoadDb.new }
       register('load_routes')       { Rivulet::Steps::LoadRoutes.new }
+      register('load_initializers') { Rivulet::Steps::LoadInitializers.new }
       register('run_migrations')    { Rivulet::Steps::RunMigrations.new }
       register('run_console')       { Rivulet::Steps::RunConsole.new }
       register('print_routes')      { Rivulet::Steps::PrintRoutes.new }
