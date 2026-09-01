@@ -187,7 +187,7 @@ RSpec.describe Rivulet::Steps::BuildContext do
 
       it 'logs the request with upcased method, path, and params' do
         step
-        expect(log_output.string).to match(/Request GET \/users\/42 .*\bid: "42"/)
+        expect(log_output.string).to match(/Request GET \/users\/42 \{(id:|:id){1}(\s|=>){1}"42"\}/)
       end
     end
   end
