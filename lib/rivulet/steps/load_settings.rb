@@ -17,7 +17,7 @@ module Rivulet
       private
 
       def default_logger(app)
-        Dry.Logger(app.config.logger.name, level: app.config.logger.level) do |setup|
+        Dry.Logger(app.config.app.name, level: app.config.logger.level) do |setup|
           setup.add_backend(
             stream: $stdout,
             log_if: :debug?,

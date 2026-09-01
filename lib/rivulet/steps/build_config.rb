@@ -2,6 +2,10 @@ module Rivulet
   module Steps
     class BuildConfig < Rivulet::Step
       def call(input)
+        Rivulet::Application.setting :app do
+          setting :name
+        end
+
         Rivulet::Application.setting :database do
           setting :dsn
           setting :pool
@@ -9,7 +13,6 @@ module Rivulet
 
         Rivulet::Application.setting :logger, reader: true do
           setting :engine
-          setting :name
           setting :level
         end
 
