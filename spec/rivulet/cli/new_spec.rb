@@ -183,4 +183,62 @@ RSpec.describe Rivulet::CLI::Commands::New do
       end
     end
   end
+
+  context 'with a name that needs normalization' do
+    before { described_class.new.call(name: app_name) }
+
+    shared_examples 'a normalized app name' do |normalized|
+      it 'creates the app under the normalized directory name' do
+        expect(Dir.exist?(normalized)).to be(true)
+        expect(Dir.exist?(app_name)).to be(false) unless app_name == normalized
+      end
+
+      it 'stamps the normalized name into the application config' do
+        config = File.read("#{normalized}/config/application.rb")
+        expect(config).to include("config.app.name = :#{normalized}")
+        expect(config).to include("postgres://rivulet:rivulet@db:5432/#{normalized}_development")
+      end
+    end
+
+    {
+      'My App'     => 'my_app',
+      'MyApp'      => 'my_app',
+      'my-app'     => 'my_app',
+      'my.app'     => 'my_app',
+      'my app 2'   => 'my_app_2',
+      'My.App 2.0' => 'my_app_2_0',
+      '  My App  ' => 'my_app',
+      'my_app'     => 'my_app',
+      'HTTPServer' => 'http_server'
+    }.each do |input, normalized|
+      context "when the name is #{input.inspect}" do
+        let(:app_name) { input }
+
+        include_examples 'a normalized app name', normalized
+      end
+    end
+  end
+
+  context 'with an invalid name' do
+    it 'prints error when the name normalizes to an empty string and exits' do
+      expect do
+        described_class.new.call(name: '---')
+      rescue SystemExit => e
+        expect(e.status).to eq(1)
+      end.to output(/invalid application name ---/).to_stdout
+    end
+
+    it 'prints error for an empty name and exits' do
+      expect do
+        described_class.new.call(name: '')
+      rescue SystemExit => e
+        expect(e.status).to eq(1)
+      end.to output(/invalid application name/).to_stdout
+    end
+
+    it 'creates no files or directories' do
+      expect { described_class.new.call(name: '---') }.to raise_error(SystemExit)
+      expect(Dir.children(Dir.pwd)).to be_empty
+    end
+  end
 end
