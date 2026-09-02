@@ -24,6 +24,8 @@ module Rivulet
         ].freeze
 
         def call(name:, with_db: nil, **)
+          name = normalize_name(name)
+
           DIRS.each { |d| create_dir "#{name}/#{d}" }
 
           write name, 'Gemfile',                    gemfile(with_db)
@@ -43,9 +45,29 @@ module Rivulet
           copy name, 'AGENTS.md', File.expand_path('../../../docs/AGENTS.md', __dir__)
 
           puts "\nDone! Next steps:\n  cd #{name}\n  docker compose up"
+        rescue ArgumentError => e
+          puts "ERROR: #{e.message}"
+          exit false
         end
 
         private
+
+        def normalize_name(name)
+          normalized = name.to_s
+                           # "HTTPServer" -> "HTTP_Server": split an acronym from the word that follows
+                           .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+                           # "myApp" -> "my_App": split a camelCase boundary
+                           .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+                           # "my app 2" -> "my_app_2": collapse spaces, dashes, dots, etc. into "_"
+                           .gsub(/[^0-9a-zA-Z]+/, '_')
+                           .downcase
+                           # "  My App  " -> "my_app": drop leading/trailing "_"
+                           .gsub(/\A_+|_+\z/, '')
+
+          raise ArgumentError, "invalid application name #{name}" if normalized.empty?
+
+          normalized
+        end
 
         def create_dir(path)
           FileUtils.mkdir_p(path)
@@ -101,7 +123,7 @@ module Rivulet
 
           <<~RUBY
             Rivulet.configure do |config|
-              config.app.name = name
+              config.app.name = :#{name}
 
               #{dsn_line}
 
