@@ -214,7 +214,7 @@ module Rivulet
                 volumes:
                   - db:/var/lib/postgresql/data
                 healthcheck:
-                  test: ["CMD-SHELL", "pg_isready -U rivulet"]
+                  test: ["CMD-SHELL", "pg_isready -U rivulet -d #{name}_development"]
                   interval: 5s
                   timeout: 3s
                   retries: 5
