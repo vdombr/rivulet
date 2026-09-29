@@ -10,7 +10,7 @@ module Rivulet
         body, headers =
           case format
           when :json
-            payload = Oj.dump(response.body, mode: :json)
+            payload = Oj.dump(response.body, mode: :strict)
 
             [
               Protocol::HTTP::Body::Buffered.wrap(payload),
