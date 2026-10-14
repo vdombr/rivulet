@@ -24,6 +24,7 @@ module Rivulet
       register('run_migrations')    { Rivulet::Steps::RunMigrations.new }
       register('run_console')       { Rivulet::Steps::RunConsole.new }
       register('print_routes')      { Rivulet::Steps::PrintRoutes.new }
+      register('freeze_settings')   { Rivulet::Steps::FreezeSettings.new }
     end
   end
 end

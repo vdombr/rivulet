@@ -7,7 +7,8 @@ module Rivulet
         load_app:          'steps.load_app',
         load_db:           'steps.load_db',
         load_routes:       'steps.load_routes',
-        load_initializers: 'steps.load_initializers'
+        load_initializers: 'steps.load_initializers',
+        freeze_settings:   'steps.freeze_settings'
       ]
 
       def call(input = {})
@@ -17,6 +18,7 @@ module Rivulet
         result = step load_app.(result)
         result = step load_routes.(result)
         result = step load_initializers.(result)
+        result = step freeze_settings.(result)
 
         result
       end
