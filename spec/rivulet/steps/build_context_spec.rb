@@ -63,6 +63,23 @@ RSpec.describe Rivulet::Steps::BuildContext do
       end
     end
 
+    context 'with a query string' do
+      let(:path) { '/users/42?page=1&sort=name' }
+
+      it 'parses query params into input' do
+        expect(step.value![:params]).to include(id: '42', page: '1', sort: 'name')
+      end
+    end
+
+    context 'when query string and body share a key with a path param' do
+      let(:path) { '/users/42?id=7&page=1' }
+      let(:env_opts) { { input: '{"id":999}', 'CONTENT_TYPE' => 'application/json' } }
+
+      it 'path param wins over query and body params' do
+        expect(step.value![:params][:id]).to eq('42')
+      end
+    end
+
     context 'with JSON body' do
       let(:env_opts) do
         { input: '{"name":"Joe","age":30}', 'CONTENT_TYPE' => 'application/json' }

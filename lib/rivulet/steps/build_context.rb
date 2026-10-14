@@ -31,17 +31,9 @@ module Rivulet
 
       def build_params(route, request, path_match)
         path_params = extract_params(route, path_match)
-        body_params = parse_body(request)
-        body_params.merge(path_params)
-      end
-
-      def parse_body(request)
-        return {} unless request.content_type&.include?('application/json')
-        raw = request.body.read
-        return {} if raw.nil? || raw.empty?
-        Oj.load(raw, symbolize_names: true)
-      rescue Oj::ParseError
-        {}
+        body_params = request.body_params
+        query_params = request.query_params
+        query_params.merge(body_params, path_params)
       end
 
       def find_route(routes, request)
