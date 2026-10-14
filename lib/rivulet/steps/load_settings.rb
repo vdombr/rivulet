@@ -9,7 +9,6 @@ module Rivulet
         load app_file
 
         app.config.logger = app.config.logger.engine || default_logger(app)
-        app.config.finalize!
 
         Success(input)
       end

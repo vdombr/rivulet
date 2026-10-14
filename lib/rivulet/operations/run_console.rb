@@ -8,6 +8,7 @@ module Rivulet
         load_db:           'steps.load_db',
         load_routes:       'steps.load_routes',
         load_initializers: 'steps.load_initializers',
+        freeze_settings:   'steps.freeze_settings',
         run_console:       'steps.run_console'
       ]
 
@@ -18,6 +19,7 @@ module Rivulet
         result = step load_app.(result)
         result = step load_routes.(result)
         result = step load_initializers.(result)
+        result = step freeze_settings.(result)
         result = step run_console.(result)
 
         result
