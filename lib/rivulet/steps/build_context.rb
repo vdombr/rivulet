@@ -16,7 +16,8 @@ module Rivulet
           context: {
             headers: extract_headers(request),
             cookies: request.cookies,
-            session: request.session
+            session: request.session,
+            request_id: request.id
           }
         )
 
