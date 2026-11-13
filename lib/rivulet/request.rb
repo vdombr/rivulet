@@ -1,8 +1,10 @@
 module Rivulet
   class Request
-    attr_reader :http_method, :path, :content_type, :query_string, :body, :session, :env
+    attr_reader :id, :http_method, :path, :content_type,
+                :query_string, :body, :session, :env
 
     def initialize(env)
+      @id           = env['HTTP_X_REQUEST_ID'] || generate_id
       @http_method  = env['REQUEST_METHOD'].downcase.to_sym
       @path         = env['PATH_INFO']
       @content_type = env['CONTENT_TYPE']
@@ -38,6 +40,10 @@ module Rivulet
         val = deep_symbolize_keys(val) if val.is_a? Hash
         result[key.to_sym] = val
       end
+    end
+
+    def generate_id
+      SecureRandom.uuid_v4
     end
   end
 end
