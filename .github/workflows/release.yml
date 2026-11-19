@@ -21,7 +21,12 @@ jobs:
           bundler-cache: true
           rubygems: latest
 
-      - uses: rubygems/release-gem@v1.4.0
+      - name: Set RubyGems version
+        run: gem update --system 4.0.24
+
+      - uses: rubygems/release-gem@v1.4.2
+        with:
+          attestations: false
 
   docker:
     runs-on: ubuntu-latest
