@@ -207,5 +207,25 @@ RSpec.describe Rivulet::Steps::BuildContext do
         expect(log_output.string).to match(/Request GET \/users\/42 \{(id:|:id){1}(\s|=>){1}"42"\}/)
       end
     end
+
+    context 'with request id header' do
+      let(:env_opts) { { 'HTTP_X_REQUEST_ID' => 'cfa1e756' } }
+
+      it 'stores HTTP_X_REQUEST_ID in context' do
+        expect(step.value![:context][:request_id]).to eq('cfa1e756')
+      end
+    end
+
+    context 'without request id header' do
+      let(:env_opts) { {} }
+
+      before do
+        allow(SecureRandom).to receive(:uuid_v4).and_return('cfa1e756')
+      end
+
+      it 'generates request id' do
+        expect(step.value![:context][:request_id]).to eq('cfa1e756')
+      end
+    end
   end
 end
